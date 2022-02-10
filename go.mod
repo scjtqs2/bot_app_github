@@ -3,7 +3,6 @@ module github.com/scjtqs2/bot_app_github
 go 1.17
 
 require (
-	github.com/bmatsuo/go-jsontree v0.0.0-20140312042150-8a1cc1e88d44
 	github.com/kataras/iris/v12 v12.1.8
 	github.com/scjtqs2/bot_adapter v0.0.0-20220210054243-1e2c8433b884
 	github.com/scjtqs2/bot_app_chat v0.0.0-20220210071559-570cf6ee0482

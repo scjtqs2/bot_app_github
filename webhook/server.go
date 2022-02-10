@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/bmatsuo/go-jsontree"
+	"github.com/tidwall/gjson"
 )
 
 // ErrInvalidEventFormat 错误信息
@@ -19,15 +19,18 @@ var ErrInvalidEventFormat = errors.New("unable to parse event string. Invalid Fo
 
 // Event 类
 type Event struct {
-	Owner      string // The username of the owner of the repository
-	Repo       string // The name of the repository
-	Branch     string // The branch the event took place on
-	Commit     string // The head commit hash attached to the event
-	Type       string // Can be either "pull_request" or "push"
-	Action     string // For Pull Requests, contains "assigned", "unassigned", "labeled", "unlabeled", "opened", "closed", "reopened", or "synchronize".
-	BaseOwner  string // For Pull Requests, contains the base owner
-	BaseRepo   string // For Pull Requests, contains the base repo
-	BaseBranch string // For Pull Requests, contains the base branch
+	Owner      string       // The username of the owner of the repository
+	Repo       string       // The name of the repository
+	Branch     string       // The branch the event took place on
+	FromUser   string       // 谁fork、start、pr
+	Tag        string       //
+	Commit     string       // The head commit hash attached to the event
+	Type       string       // Can be either "pull_request" or "push"
+	Action     string       // For Pull Requests, contains "assigned", "unassigned", "labeled", "unlabeled", "opened", "closed", "reopened", or "synchronize".
+	BaseOwner  string       // For Pull Requests, contains the base owner
+	BaseRepo   string       // For Pull Requests, contains the base repo
+	BaseBranch string       // For Pull Requests, contains the base branch
+	Payload    gjson.Result // 对象化的json数据
 }
 
 // NewEvent Create a new event from a string, the string format being the same as the one produced by event.String()
@@ -157,7 +160,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "400 Bad Request - Missing X-GitHub-Event Header", http.StatusBadRequest)
 		return
 	}
-	if eventType != "push" && eventType != "pull_request" {
+	if !allowEvent(eventType) {
 		http.Error(w, "400 Bad Request - Unknown Event Type "+eventType, http.StatusBadRequest)
 		return
 	}
@@ -187,89 +190,86 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	request := jsontree.New()
-	err = request.UnmarshalJSON(body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	request := gjson.ParseBytes(body)
+	if !gjson.ValidBytes(body) {
+		http.Error(w, "error json request", http.StatusInternalServerError)
 		return
 	}
 
 	// Parse the request and build the Event
 	event := Event{}
+	event.Payload = request
+	event.Type = eventType
 	switch eventType {
 	case "push":
-		rawRef, err := request.Get("ref").String()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		rawRef := request.Get("ref").String()
 		// If the ref is not a branch, we don't care about it
-		if s.ignoreRef(rawRef) || request.Get("head_commit").IsNull() {
+		if s.ignoreRef(rawRef) || request.Get("head_commit").Exists() {
 			return
 		}
-
-		// Fill in values
-		event.Type = eventType
 		event.Branch = rawRef[11:]
-		event.Repo, err = request.Get("repository").Get("name").String()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		event.Commit, err = request.Get("head_commit").Get("id").String()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		event.Owner, err = request.Get("repository").Get("owner").Get("name").String()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		event.Repo = request.Get("repository.name").String()
+		event.Commit = request.Get("head_commit.id").String()
+		event.Owner = request.Get("repository.owner.name").String()
 	case "pull_request":
-		event.Action, err = request.Get("action").String()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		// Fill in values
-		event.Type = eventType
-		event.Owner, err = request.Get("pull_request").Get("head").Get("repo").Get("owner").Get("login").String()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		event.Repo, err = request.Get("pull_request").Get("head").Get("repo").Get("name").String()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		event.Branch, err = request.Get("pull_request").Get("head").Get("ref").String()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		event.Commit, err = request.Get("pull_request").Get("head").Get("sha").String()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		event.BaseOwner, err = request.Get("pull_request").Get("base").Get("repo").Get("owner").Get("login").String()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		event.BaseRepo, err = request.Get("pull_request").Get("base").Get("repo").Get("name").String()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		event.BaseBranch, err = request.Get("pull_request").Get("base").Get("ref").String()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		event.Action = request.Get("action").String()
+		event.Owner = request.Get("pull_request.head.repo.owner.login").String()
+		event.Repo = request.Get("pull_request.head.repo.name").String()
+		event.Branch = request.Get("pull_request.head.ref").String()
+		event.Commit = request.Get("pull_request.head.sha").String()
+		event.BaseOwner = request.Get("pull_request.base.repo.owner.login").String()
+		event.BaseRepo = request.Get("pull_request.base.repo.name").String()
+		event.BaseBranch = request.Get("pull_request.base.ref").String()
+	case "pull_request_review":
+		event.Action = request.Get("action").String()
+		event.Owner = request.Get("pull_request.head.repo.owner.login").String()
+		event.Repo = request.Get("pull_request.head.repo.name").String()
+		event.Branch = request.Get("pull_request.head.ref").String()
+		event.Commit = request.Get("pull_request.head.sha").String()
+		event.BaseOwner = request.Get("pull_request.base.repo.owner.login").String()
+		event.BaseRepo = request.Get("pull_request.base.repo.name").String()
+		event.BaseBranch = request.Get("pull_request.base.ref").String()
+	case "pull_request_review_comment":
+		event.Action = request.Get("action").String()
+		event.Owner = request.Get("pull_request.head.repo.owner.login").String()
+		event.Repo = request.Get("pull_request.head.repo.name").String()
+		event.Branch = request.Get("pull_request.head.ref").String()
+		event.Commit = request.Get("pull_request.head.sha").String()
+		event.BaseOwner = request.Get("pull_request.base.repo.owner.login").String()
+		event.BaseRepo = request.Get("pull_request.base.repo.name").String()
+		event.BaseBranch = request.Get("pull_request.base.ref").String()
+	case "release":
+		event.Action = request.Get("action").String()
+		event.FromUser = request.Get("sender.login").String()
+		event.Repo = request.Get("repository.name").String()
+		event.Commit = request.Get("head_commit.id").String()
+		event.Owner = request.Get("repository.owner.login").String()
+		event.Branch = request.Get("release.target_commitish").String()
+		event.Tag = request.Get("release.tag_name").String()
+	case "fork":
+		event.Action = request.Get("action").String()
+		event.FromUser = request.Get("sender.login").String()
+		event.Repo = request.Get("repository.name").String()
+		event.Owner = request.Get("repository.owner.login").String()
+	case "star":
+		event.Action = request.Get("action").String()
+		event.FromUser = request.Get("sender.login").String()
+		event.Repo = request.Get("repository.name").String()
+		event.Owner = request.Get("repository.owner.login").String()
+	case "issue_comment":
+		event.Action = request.Get("action").String()
+		event.FromUser = request.Get("sender.login").String()
+		event.Repo = request.Get("repository.name").String()
+		event.Owner = request.Get("repository.owner.login").String()
+	case "issues":
+		event.Action = request.Get("action").String()
+		event.FromUser = request.Get("sender.login").String()
+		event.Repo = request.Get("repository.name").String()
+		event.Owner = request.Get("repository.owner.login").String()
+	case "create":
+		event.FromUser = request.Get("sender.login").String()
+		event.Repo = request.Get("repository.name").String()
+		event.Owner = request.Get("repository.owner.login").String()
 	default:
 		http.Error(w, "Unknown Event Type "+eventType, http.StatusInternalServerError)
 		return
@@ -281,4 +281,76 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}()
 
 	_, _ = w.Write([]byte(event.String()))
+}
+
+// allowEvent 支持解析的event类型
+func allowEvent(eventType string) bool {
+	allow := []string{
+		/**
+		The action that was performed. Can be one of:
+		assigned
+		auto_merge_disabled
+		auto_merge_enabled
+		closed: If the action is closed and the merged key is false, the pull request was closed with unmerged commits. If the action is closed and the merged key is true, the pull request was merged.
+		converted_to_draft
+		edited
+		labeled
+		locked
+		opened
+		ready_for_review
+		reopened
+		review_request_removed
+		review_requested
+		synchronize: Triggered when a pull request's head branch is updated. For example, when the head branch is updated from the base branch, when new commits are pushed to the head branch, or when the base branch is changed.
+		unassigned
+		unlabeled
+		unlocked
+		*/
+		"pull_request", // pr
+		/**
+		The action that was performed. Can be one of:
+		submitted - A pull request review is submitted into a non-pending state.
+		edited - The body of a review has been edited.
+		dismissed - A review has been dismissed.
+		*/
+		"pull_request_review", // PR 的 review
+		/**
+		The action that was performed on the comment. Can be one of created, edited, or deleted.
+		*/
+		"pull_request_review_comment", // PR review的回复
+		/**
+		The action that was performed. Can be one of:
+		published: a release, pre-release, or draft of a release is published
+		unpublished: a release or pre-release is deleted
+		created: a draft is saved, or a release or pre-release is published without previously being saved as a draft
+		edited: a release, pre-release, or draft release is edited
+		deleted: a release, pre-release, or draft release is deleted
+		prereleased: a pre-release is created
+		released: a release or draft of a release is published, or a pre-release is changed to a release
+		*/
+		"release", // 发版
+
+		"fork", // A user forks a repository. For more information, see the "forks" REST API.
+		"push", // 提交commit
+		/**
+		The action performed. Can be created or deleted.
+		*/
+		"star", // 有人点星星
+		/**
+		action The action that was performed on the comment. Can be one of created, edited, or deleted.
+		*/
+		"issue_comment", //
+		/**
+		action The action that was performed. Can be one of opened, edited, deleted, pinned, unpinned, closed, reopened, assigned, unassigned, labeled, unlabeled, locked, unlocked, transferred, milestoned, or demilestoned.
+		*/
+		"issues", //
+
+		"create", // A Git branch or tag is created. For more information, see the "Git database" REST API.
+	}
+	for _, s := range allow {
+		if s == eventType {
+			return true
+		}
+	}
+	return false
 }

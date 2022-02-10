@@ -15,11 +15,11 @@ func (a *App) parseMsg(data string) {
 		case event.MessageTypePrivate:
 			var req event.MessagePrivate
 			_ = json.Unmarshal([]byte(msg.Raw), &req)
-			go a.search.SearchPrivate(req)
+			a.search.SearchPrivate(req)
 		case event.MessageTypeGroup:
 			var req event.MessageGroup
 			_ = json.Unmarshal([]byte(msg.Raw), &req)
-			go a.search.SearchGroup(req)
+			a.search.SearchGroup(req)
 		}
 	case "notice": // 通知事件
 		switch msg.Get("notice_type").String() {

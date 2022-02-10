@@ -1,8 +1,13 @@
 package webhook
 
 import (
+	"context"
+	"fmt"
 	"os"
 	"strconv"
+
+	"github.com/scjtqs2/bot_adapter/coolq"
+	"github.com/scjtqs2/bot_adapter/pb/entity"
 
 	"github.com/scjtqs2/bot_adapter/client"
 	log "github.com/sirupsen/logrus"
@@ -49,5 +54,65 @@ func (g *GHook) Init() {
 func (g *GHook) parseEvents() {
 	for event := range g.Server.Events {
 		log.Infof("resived event %+v", event)
+		var msg string
+		switch event.Type {
+		case "star":
+			// Tim-Paik starred Mrs4s/go-cqhttp (total 3914 stargazers)
+			var a string
+			switch event.Action {
+			case "created":
+				a = "starred"
+			case "deleted":
+				a = "unstarred"
+			}
+			msg = fmt.Sprintf("%s %s %s/%s (total %d stargazers)", event.FromUser, a, event.Owner, event.Repo, event.Payload.Get("repository.stargazers_count").Int())
+		case "fork":
+			msg = fmt.Sprintf("%s forked %s/%s (total %d forks_count", event.FromUser, event.Owner, event.Repo, event.Payload.Get("repository.forks_count").Int())
+		case "issues":
+			switch event.Action {
+			case "opened":
+				// wdvxdr1123 opened issue Mrs4s/go-cqhttp#1358
+				msg = fmt.Sprintf("%s %s issue %s/%s #%d", event.FromUser, event.Action, event.Owner, event.Repo, event.Payload.Get("issue.number").Int()) +
+					coolq.EnImageCode(fmt.Sprintf("https://opengraph.githubassets.com/0/%s/%s/issues/%d", event.Owner, event.Repo, event.Payload.Get("issue.number").Int()), 0)
+			case "closed":
+				msg = fmt.Sprintf("%s %s issue %s/%s #%d", event.FromUser, event.Action, event.Owner, event.Repo, event.Payload.Get("issue.number").Int()) +
+					coolq.EnImageCode(fmt.Sprintf("https://opengraph.githubassets.com/0/%s/%s/issues/%d", event.Owner, event.Repo, event.Payload.Get("issue.number").Int()), 0)
+			case "reopened":
+				msg = fmt.Sprintf("%s %s issue %s/%s #%d", event.FromUser, event.Action, event.Owner, event.Repo, event.Payload.Get("issue.number").Int()) +
+					coolq.EnImageCode(fmt.Sprintf("https://opengraph.githubassets.com/0/%s/%s/issues/%d", event.Owner, event.Repo, event.Payload.Get("issue.number").Int()), 0)
+			}
+		case "pull_request":
+			switch event.Action {
+			case "opened":
+				// wdvxdr1123 opened an pull request for Mrs4s/go-cqhttp#1356(dev<wdvxdr1123:test_pr_review)
+				msg = fmt.Sprintf("%s opened an pull request for %s/%s#%d (%s<-%s:%s)", event.FromUser, event.Owner, event.Repo,
+					event.Payload.Get("pull_request.number").Int(),
+					event.BaseBranch, event.Owner, event.Branch) +
+					coolq.EnImageCode(fmt.Sprintf("https://opengraph.githubassets.com/0/%s/%s/pull/%d", event.BaseOwner, event.BaseRepo, event.Payload.Get("pull_request.number").Int()), 0)
+			default:
+				continue
+			}
+		default:
+			log.Warnf("unknow eventType:%s,action:%s from %s/%s", event.Type, event.Action, event.Owner, event.Repo)
+			continue
+		}
+		if msg == "" {
+			continue
+		}
+		if g.NotifyQQ != 0 {
+			_, err := g.Cli.SendPrivateMsg(context.TODO(), &entity.SendPrivateMsgReq{
+				UserId:  g.NotifyQQ,
+				Message: []byte(msg),
+			})
+			if err != nil {
+				log.Errorf("push to NotifyQQ %d err:%v", g.NotifyQQ, err)
+			}
+		}
+		if g.NotifyQQGroup != 0 {
+			_, err := g.Cli.SendGroupMsg(context.TODO(), &entity.SendGroupMsgReq{GroupId: g.NotifyQQGroup, Message: []byte(msg)})
+			if err != nil {
+				log.Errorf("push to NotifyQQGroup %d err:%v", g.NotifyQQGroup, err)
+			}
+		}
 	}
 }
