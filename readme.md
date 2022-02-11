@@ -27,3 +27,4 @@
 + pull_request
 + fork
 + issue
++ issue_comment
