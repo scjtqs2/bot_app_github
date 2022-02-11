@@ -104,19 +104,19 @@ func (g *GHook) parseEvents() {
 				msg = fmt.Sprintf("%s commented on %s/%s #%d", event.FromUser, event.Owner, event.Repo, event.Payload.Get("issue.number").Int()) +
 					fmt.Sprintf("%s Title: %s \n", labels, event.Payload.Get("issue.title").String()) +
 					fmt.Sprintf("Body: %s \n", event.Payload.Get("issue.body").String()) +
-					fmt.Sprintf("Comment: %s \n", event.Payload.Get("comment.body").String())+
+					fmt.Sprintf("Comment: %s \n", event.Payload.Get("comment.body").String()) +
 					fmt.Sprintf("jump: %s \n", event.Payload.Get("comment.html_url").String())
 			case "edited":
 				msg = fmt.Sprintf("%s edited commente on %s/%s #%d", event.FromUser, event.Owner, event.Repo, event.Payload.Get("issue.number").Int()) +
 					fmt.Sprintf("%s Title: %s \n", labels, event.Payload.Get("issue.title").String()) +
 					fmt.Sprintf("Body: %s \n", event.Payload.Get("issue.body").String()) +
-					fmt.Sprintf("Comment: %s \n", event.Payload.Get("comment.body").String())+
+					fmt.Sprintf("Comment: %s \n", event.Payload.Get("comment.body").String()) +
 					fmt.Sprintf("jump: %s \n", event.Payload.Get("comment.html_url").String())
 			case "deleted":
 				msg = fmt.Sprintf("%s deleted commente on %s/%s #%d", event.FromUser, event.Owner, event.Repo, event.Payload.Get("issue.number").Int()) +
 					fmt.Sprintf("%s Title: %s \n", labels, event.Payload.Get("issue.title").String()) +
 					fmt.Sprintf("Body: %s \n", event.Payload.Get("issue.body").String()) +
-					fmt.Sprintf("Comment: %s \n", event.Payload.Get("comment.body").String())+
+					fmt.Sprintf("Comment: %s \n", event.Payload.Get("comment.body").String()) +
 					fmt.Sprintf("jump: %s \n", event.Payload.Get("comment.html_url").String())
 			}
 		case "pull_request":
