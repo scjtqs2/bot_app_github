@@ -262,6 +262,10 @@ func (g *GHook) getIssueByChrome(url string, issueID string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	sidebar, err := issue.FindElement(selenium.ByCSSSelector, "#partial-discussion-sidebar")
+	if err ==nil {
+		_, _ = wd.ExecuteScript("arguments[0].remove();", []interface{}{sidebar})
+	}
 	size, err := sizeEle.Size()
 	if err != nil {
 		return nil, err
@@ -322,17 +326,21 @@ func (g *GHook) getPullRequestByChrome(url string) ([]byte, error) {
 		_, err = wd.FindElement(selenium.ByCSSSelector, "#js-repo-pjax-container")
 		return err == nil, nil
 	})
-	issue, err := wd.FindElement(selenium.ByCSSSelector, "#js-repo-pjax-container")
+	pullRequest, err := wd.FindElement(selenium.ByCSSSelector, "#js-repo-pjax-container")
 	if err != nil {
 		return nil, err
 	}
-	size, err := issue.Size()
+	sidebar, err := pullRequest.FindElement(selenium.ByCSSSelector, "#partial-discussion-sidebar")
+	if err ==nil {
+		_, _ = wd.ExecuteScript("arguments[0].remove();", []interface{}{sidebar})
+	}
+	size, err := pullRequest.Size()
 	if err != nil {
 		return nil, err
 	}
 	window, _ := wd.CurrentWindowHandle()
 	_ = wd.ResizeWindow(window, size.Width, size.Height+100)
-	return issue.Screenshot(false)
+	return pullRequest.Screenshot(false)
 }
 
 // newChrome 初始化chrome的webdriver
@@ -350,7 +358,7 @@ func (g *GHook) newChrome() (selenium.WebDriver, error) {
 		Args: []string{
 			"--headless", // 设置Chrome无头模式，在linux下运行，需要设置这个参数，否则会报错
 			// "--no-sandbox",
-			"--window-size=375,812",
+			"--window-size=600,812",
 			// fmt.Sprintf("--proxy-server=%s", "http://192.168.28.101:7890"), // --proxy-server=http://127.0.0.1:1234
 		},
 	}
