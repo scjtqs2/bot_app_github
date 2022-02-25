@@ -250,6 +250,10 @@ func (g *GHook) getIssueByChrome(url string, issueID string) ([]byte, error) {
 	if err := wd.Get(url); err != nil {
 		return nil, err
 	}
+	_ = wd.Wait(func(wd selenium.WebDriver) (bool, error) {
+		_, err = wd.FindElement(selenium.ByCSSSelector, "#js-repo-pjax-container")
+		return err == nil, nil
+	})
 	sizeEle, err := wd.FindElement(selenium.ByCSSSelector, "#js-repo-pjax-container")
 	if err != nil {
 		return nil, err
@@ -280,6 +284,10 @@ func (g *GHook) getIssueCommentByChrome(url string, issueCommentID string) ([]by
 	if err := wd.Get(url); err != nil {
 		return nil, err
 	}
+	_ = wd.Wait(func(wd selenium.WebDriver) (bool, error) {
+		_, err = wd.FindElement(selenium.ByCSSSelector, "#js-repo-pjax-container")
+		return err == nil, nil
+	})
 	sizeEle, err := wd.FindElement(selenium.ByCSSSelector, "#js-repo-pjax-container")
 	if err != nil {
 		return nil, err
@@ -310,6 +318,10 @@ func (g *GHook) getPullRequestByChrome(url string) ([]byte, error) {
 	if err := wd.Get(url); err != nil {
 		return nil, err
 	}
+	_ = wd.Wait(func(wd selenium.WebDriver) (bool, error) {
+		_, err = wd.FindElement(selenium.ByCSSSelector, "#js-repo-pjax-container")
+		return err == nil, nil
+	})
 	issue, err := wd.FindElement(selenium.ByCSSSelector, "#js-repo-pjax-container")
 	if err != nil {
 		return nil, err
