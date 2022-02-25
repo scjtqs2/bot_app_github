@@ -239,6 +239,7 @@ func (g *GHook) checkSelenuinEnable() bool {
 
 // getIssueByChrome 通过chrome截图获取 issue详情
 func (g *GHook) getIssueByChrome(url string, issueID string) ([]byte, error) {
+	log.Debugf("url:%s , issueID:%s", url, issueID)
 	wd, err := g.newChrome()
 	if err != nil {
 		return nil, err
