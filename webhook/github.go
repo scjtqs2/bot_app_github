@@ -97,6 +97,8 @@ func (g *GHook) parseEvents() {
 					if pic, err := g.getIssueByChrome(event.Payload.Get("issue.url").String(), event.Payload.Get("issue.id").String()); err == nil {
 						isPic = true
 						msg += coolq.EnImageCode(fmt.Sprintf("base64://%s", base64.StdEncoding.EncodeToString(pic)), 0)
+					} else {
+						log.Errorf("getIssueByChrome err:%v", err)
 					}
 				}
 				if !isPic {
@@ -111,6 +113,8 @@ func (g *GHook) parseEvents() {
 					if pic, err := g.getIssueByChrome(event.Payload.Get("issue.url").String(), event.Payload.Get("issue.id").String()); err == nil {
 						isPic = true
 						msg += coolq.EnImageCode(fmt.Sprintf("base64://%s", base64.StdEncoding.EncodeToString(pic)), 0)
+					} else {
+						log.Errorf("getIssueByChrome err:%v", err)
 					}
 				}
 				if !isPic {
@@ -125,6 +129,8 @@ func (g *GHook) parseEvents() {
 					if pic, err := g.getIssueByChrome(event.Payload.Get("issue.url").String(), event.Payload.Get("issue.id").String()); err == nil {
 						isPic = true
 						msg += coolq.EnImageCode(fmt.Sprintf("base64://%s", base64.StdEncoding.EncodeToString(pic)), 0)
+					} else {
+						log.Errorf("getIssueByChrome err:%v", err)
 					}
 				}
 				if !isPic {
@@ -146,6 +152,8 @@ func (g *GHook) parseEvents() {
 					if pic, err := g.getIssueCommentByChrome(event.Payload.Get("issue.url").String(), event.Payload.Get("issue.id").String()); err == nil {
 						isPic = true
 						msg += coolq.EnImageCode(fmt.Sprintf("base64://%s", base64.StdEncoding.EncodeToString(pic)), 0)
+					} else {
+						log.Errorf("getIssueCommentByChrome err:%v", err)
 					}
 				}
 				if !isPic {
@@ -160,6 +168,8 @@ func (g *GHook) parseEvents() {
 					if pic, err := g.getIssueCommentByChrome(event.Payload.Get("issue.url").String(), event.Payload.Get("issue.id").String()); err == nil {
 						isPic = true
 						msg += coolq.EnImageCode(fmt.Sprintf("base64://%s", base64.StdEncoding.EncodeToString(pic)), 0)
+					} else {
+						log.Errorf("getIssueCommentByChrome err:%v", err)
 					}
 				}
 				if !isPic {
@@ -181,8 +191,18 @@ func (g *GHook) parseEvents() {
 				msg = fmt.Sprintf("%s opened an pull request for %s/%s #%d (%s<-%s:%s) \n", event.FromUser, event.Owner, event.Repo,
 					event.Payload.Get("pull_request.number").Int(),
 					event.BaseBranch, event.Owner, event.Branch) +
-					fmt.Sprintf("jump: %s \n", event.Payload.Get("pull_request.html_url").String()) +
-					coolq.EnImageCode(fmt.Sprintf("https://opengraph.githubassets.com/0/%s/%s/pull/%d", event.BaseOwner, event.BaseRepo, event.Payload.Get("pull_request.number").Int()), 0)
+					fmt.Sprintf("jump: %s \n", event.Payload.Get("pull_request.html_url").String())
+				if g.checkSelenuinEnable() {
+					if pic, err := g.getPullRequestByChrome(event.Payload.Get("pull_request.html_url").String()); err == nil {
+						isPic = true
+						msg += coolq.EnImageCode(fmt.Sprintf("base64://%s", base64.StdEncoding.EncodeToString(pic)), 0)
+					} else {
+						log.Errorf("getPullRequestByChrome err:%v", err)
+					}
+				}
+				if !isPic {
+					msg += coolq.EnImageCode(fmt.Sprintf("https://opengraph.githubassets.com/0/%s/%s/pull/%d", event.BaseOwner, event.BaseRepo, event.Payload.Get("pull_request.number").Int()), 0)
+				}
 			default:
 				continue
 			}
