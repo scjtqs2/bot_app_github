@@ -38,11 +38,15 @@ ENV GITHUB_WEBHOOK_ENABLE "false"
 ENV GITHUB_WEBHOOK_SECRET "supersecretcode"
 ENV GITHUB_WEBHOOK_NOTIFY_QQ ""
 ENV GITHUB_WEBHOOK_NOTIFY_GROUP ""
+ENV SELENIUM_CHROME_ENABLE "false"
+ENV SELENIUM_CHROME_ADDR "http://127.0.0.1:4444/wd/hub"
 
 COPY ./init.sh /
 COPY --from=builder /build/bot_app /usr/bin/bot_app
 RUN chmod +x /usr/bin/bot_app && chmod +x /init.sh
 
 WORKDIR /data
+
+EXPOSE 8080 80
 
 ENTRYPOINT [ "/init.sh" ]

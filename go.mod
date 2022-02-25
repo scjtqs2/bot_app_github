@@ -7,6 +7,7 @@ require (
 	github.com/scjtqs2/bot_adapter v0.0.0-20220210054243-1e2c8433b884
 	github.com/scjtqs2/bot_app_chat v0.0.0-20220210071559-570cf6ee0482
 	github.com/sirupsen/logrus v1.8.1
+	github.com/tebeka/selenium v0.9.9
 	github.com/tidwall/gjson v1.14.0
 )
 
@@ -16,6 +17,7 @@ require (
 	github.com/CloudyKit/jet/v3 v3.0.0 // indirect
 	github.com/Shopify/goreferrer v0.0.0-20181106222321-ec9c9a553398 // indirect
 	github.com/aymerick/raymond v2.0.3-0.20180322193309-b565731e1464+incompatible // indirect
+	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/eknkc/amber v0.0.0-20171010120322-cdade1c07385 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect

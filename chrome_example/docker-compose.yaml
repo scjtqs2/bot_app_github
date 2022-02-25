@@ -1,0 +1,13 @@
+version: "2.4"
+services:
+  standalone-chrome:
+    image: selenium/standalone-chrome:4.1.2-20220217
+    ports:
+      - 4444:4444
+    shm_size: 2G
+    restart: always
+
+
+networks:
+  default:
+    driver: bridge
