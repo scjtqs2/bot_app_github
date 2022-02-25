@@ -150,7 +150,7 @@ func (g *GHook) parseEvents() {
 				msg = fmt.Sprintf("%s commented on %s/%s #%d \n", event.FromUser, event.Owner, event.Repo, event.Payload.Get("issue.number").Int()) +
 					fmt.Sprintf("jump: %s \n", event.Payload.Get("comment.html_url").String())
 				if g.checkSelenuinEnable() {
-					if pic, err := g.getIssueCommentByChrome(event.Payload.Get("comment.html_url").String(), event.Payload.Get("issue.id").String()); err == nil {
+					if pic, err := g.getIssueCommentByChrome(event.Payload.Get("comment.html_url").String(), event.Payload.Get("comment.id").String()); err == nil {
 						isPic = true
 						msg += coolq.EnImageCode(fmt.Sprintf("base64://%s", base64.StdEncoding.EncodeToString(pic)), 0)
 					} else {
@@ -166,7 +166,7 @@ func (g *GHook) parseEvents() {
 				msg = fmt.Sprintf("%s edited commente on %s/%s #%d \n", event.FromUser, event.Owner, event.Repo, event.Payload.Get("issue.number").Int()) +
 					fmt.Sprintf("jump: %s \n", event.Payload.Get("comment.html_url").String())
 				if g.checkSelenuinEnable() {
-					if pic, err := g.getIssueCommentByChrome(event.Payload.Get("comment.html_url").String(), event.Payload.Get("issue.id").String()); err == nil {
+					if pic, err := g.getIssueCommentByChrome(event.Payload.Get("comment.html_url").String(), event.Payload.Get("comment.id").String()); err == nil {
 						isPic = true
 						msg += coolq.EnImageCode(fmt.Sprintf("base64://%s", base64.StdEncoding.EncodeToString(pic)), 0)
 					} else {
