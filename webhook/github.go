@@ -5,11 +5,12 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/tebeka/selenium/chrome"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/tebeka/selenium/chrome"
 
 	"github.com/scjtqs2/bot_adapter/coolq"
 	"github.com/scjtqs2/bot_adapter/pb/entity"
@@ -243,8 +244,8 @@ func (g *GHook) getIssueByChrome(url string, issueID string) ([]byte, error) {
 		return nil, err
 	}
 	defer func() {
-		wd.Close()
-		wd.Quit()
+		_ = wd.Close()
+		_ = wd.Quit()
 	}()
 	if err := wd.Get(url); err != nil {
 		return nil, err
@@ -273,8 +274,8 @@ func (g *GHook) getIssueCommentByChrome(url string, issueCommentID string) ([]by
 		return nil, err
 	}
 	defer func() {
-		wd.Close()
-		wd.Quit()
+		_ = wd.Close()
+		_ = wd.Quit()
 	}()
 	if err := wd.Get(url); err != nil {
 		return nil, err
@@ -303,8 +304,8 @@ func (g *GHook) getPullRequestByChrome(url string) ([]byte, error) {
 		return nil, err
 	}
 	defer func() {
-		wd.Close()
-		wd.Quit()
+		_ = wd.Close()
+		_ = wd.Quit()
 	}()
 	if err := wd.Get(url); err != nil {
 		return nil, err
