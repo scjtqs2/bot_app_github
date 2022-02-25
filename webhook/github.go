@@ -254,19 +254,23 @@ func (g *GHook) getIssueByChrome(url string, issueID string) ([]byte, error) {
 		_, err = wd.FindElement(selenium.ByCSSSelector, "#js-repo-pjax-container")
 		return err == nil, nil
 	})
-	sizeEle, err := wd.FindElement(selenium.ByCSSSelector, "#js-repo-pjax-container")
+	issue, err := wd.FindElement(selenium.ByCSSSelector, "#js-repo-pjax-container")
 	if err != nil {
 		return nil, err
 	}
-	issue, err := wd.FindElement(selenium.ByCSSSelector, fmt.Sprintf("#issue-%s > div", issueID))
-	if err != nil {
-		return nil, err
-	}
+	// issue, err := wd.FindElement(selenium.ByCSSSelector, fmt.Sprintf("#issue-%s > div", issueID))
+	// if err != nil {
+	// 	return nil, err
+	// }
 	sidebar, err := issue.FindElement(selenium.ByCSSSelector, "#partial-discussion-sidebar")
-	if err ==nil {
+	if err == nil {
 		_, _ = wd.ExecuteScript("arguments[0].remove();", []interface{}{sidebar})
 	}
-	size, err := sizeEle.Size()
+	signBar, err := issue.FindElement(selenium.ByCSSSelector, ".discussion-timeline-actions")
+	if err == nil {
+		_, _ = wd.ExecuteScript("arguments[0].remove();", []interface{}{signBar})
+	}
+	size, err := issue.Size()
 	if err != nil {
 		return nil, err
 	}
@@ -331,8 +335,12 @@ func (g *GHook) getPullRequestByChrome(url string) ([]byte, error) {
 		return nil, err
 	}
 	sidebar, err := pullRequest.FindElement(selenium.ByCSSSelector, "#partial-discussion-sidebar")
-	if err ==nil {
+	if err == nil {
 		_, _ = wd.ExecuteScript("arguments[0].remove();", []interface{}{sidebar})
+	}
+	signBar, err := pullRequest.FindElement(selenium.ByCSSSelector, ".discussion-timeline-actions")
+	if err == nil {
+		_, _ = wd.ExecuteScript("arguments[0].remove();", []interface{}{signBar})
 	}
 	size, err := pullRequest.Size()
 	if err != nil {
