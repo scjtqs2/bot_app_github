@@ -82,7 +82,7 @@ func (g *GHook) parseEvents() {
 			}
 			msg = fmt.Sprintf("%s %s %s/%s (total %d stargazers)", event.FromUser, a, event.Owner, event.Repo, event.Payload.Get("repository.stargazers_count").Int())
 		case "fork":
-			msg = fmt.Sprintf("%s forked %s/%s (total %d forks_count", event.FromUser, event.Owner, event.Repo, event.Payload.Get("repository.forks_count").Int())
+			msg = fmt.Sprintf("%s forked %s/%s (total %d forks_count)", event.FromUser, event.Owner, event.Repo, event.Payload.Get("repository.forks_count").Int())
 		case "issues":
 			var labels string
 			for _, result := range event.Payload.Get("issue.labels").Array() {
