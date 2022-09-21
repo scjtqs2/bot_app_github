@@ -370,7 +370,7 @@ func (g *GHook) newChrome() (selenium.WebDriver, error) {
 			"--window-size=600,812",
 			// fmt.Sprintf("--proxy-server=%s", "http://192.168.28.101:7890"), // --proxy-server=http://127.0.0.1:1234
 		},
-		W3C: true,
+		// W3C: true,
 	}
 	caps.AddChrome(chromeCaps)
 	wd, err := selenium.NewRemote(caps, addr)
