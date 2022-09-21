@@ -245,7 +245,7 @@ func (g *GHook) getIssueByChrome(url string, issueID string) ([]byte, error) {
 		return nil, err
 	}
 	defer func() {
-		_ = wd.Close()
+		// _ = wd.Close()
 		_ = wd.Quit()
 	}()
 	if err := wd.Get(url); err != nil {
@@ -287,7 +287,7 @@ func (g *GHook) getIssueCommentByChrome(url string, issueCommentID string) ([]by
 		return nil, err
 	}
 	defer func() {
-		_ = wd.Close()
+		// _ = wd.Close()
 		_ = wd.Quit()
 	}()
 	if err := wd.Get(url); err != nil {
@@ -321,7 +321,7 @@ func (g *GHook) getPullRequestByChrome(url string) ([]byte, error) {
 		return nil, err
 	}
 	defer func() {
-		_ = wd.Close()
+		// _ = wd.Close()
 		_ = wd.Quit()
 	}()
 	if err := wd.Get(url); err != nil {
