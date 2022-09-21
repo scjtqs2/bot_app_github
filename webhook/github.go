@@ -359,7 +359,7 @@ func (g *GHook) newChrome() (selenium.WebDriver, error) {
 	}
 	addr := os.Getenv("SELENIUM_CHROME_ADDR")
 	selenium.HTTPClient = &http.Client{
-		Timeout: time.Second * 60,
+		Timeout: time.Second * 30,
 	}
 	caps := selenium.Capabilities{"browserName": "chrome"}
 	// chrome参数
