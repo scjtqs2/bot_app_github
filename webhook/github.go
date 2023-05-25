@@ -417,7 +417,7 @@ func (g *GHook) newFirefox() (selenium.WebDriver, error) {
 	if !g.checkFirefoxEnable() {
 		return nil, errors.New("firefox not enabled")
 	}
-	addr := os.Getenv("SELENIUM_FIRFOX_ADDR")
+	addr := os.Getenv("SELENIUM_FIREFOX_ADDR")
 	selenium.HTTPClient = &http.Client{
 		Timeout: time.Second * 30,
 	}
