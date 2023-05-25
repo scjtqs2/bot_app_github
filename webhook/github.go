@@ -260,7 +260,7 @@ func (g *GHook) getIssueByChrome(url string, issueID string) ([]byte, error) {
 		return nil, err
 	}
 	defer func() {
-		_ = wd.Close()
+		// _ = wd.Close()
 		_ = wd.Quit()
 	}()
 	if err := wd.Get(url); err != nil {
@@ -302,7 +302,7 @@ func (g *GHook) getIssueCommentByChrome(url string, issueCommentID string) ([]by
 		return nil, err
 	}
 	defer func() {
-		_ = wd.Close()
+		// _ = wd.Close()
 		_ = wd.Quit()
 	}()
 	if err := wd.Get(url); err != nil {
@@ -336,7 +336,7 @@ func (g *GHook) getPullRequestByChrome(url string) ([]byte, error) {
 		return nil, err
 	}
 	defer func() {
-		_ = wd.Close()
+		// _ = wd.Close()
 		_ = wd.Quit()
 	}()
 	if err := wd.Get(url); err != nil {
@@ -405,6 +405,7 @@ func (g *GHook) newChrome() (selenium.WebDriver, error) {
 			"--window-size=600,812",
 			// fmt.Sprintf("--proxy-server=%s", "http://192.168.28.101:7890"), // --proxy-server=http://127.0.0.1:1234
 		},
+		W3C: true,
 	}
 	caps.AddChrome(chromeCaps)
 	wd, err := selenium.NewRemote(caps, addr)

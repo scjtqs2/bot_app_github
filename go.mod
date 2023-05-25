@@ -7,7 +7,7 @@ require (
 	github.com/scjtqs2/bot_adapter v0.0.0-20220210054243-1e2c8433b884
 	github.com/scjtqs2/bot_app_chat v0.0.0-20220210071559-570cf6ee0482
 	github.com/sirupsen/logrus v1.8.1
-	github.com/tebeka/selenium v0.9.9
+	github.com/tebeka/selenium v0.9.10-0.20211105214847-e9100b7f5ac1
 	github.com/tidwall/gjson v1.14.0
 )
 
@@ -30,6 +30,7 @@ require (
 	github.com/kataras/pio v0.0.2 // indirect
 	github.com/kataras/sitemap v0.0.5 // indirect
 	github.com/klauspost/compress v1.13.4 // indirect
+	github.com/mediabuyerbot/go-crx3 v1.3.1 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect

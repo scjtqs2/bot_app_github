@@ -1,3 +1,4 @@
+// Package main 入口
 package main
 
 import (
