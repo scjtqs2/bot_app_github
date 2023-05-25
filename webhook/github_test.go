@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// TestChrome 测试 chrome
 func TestChrome(t *testing.T) {
 	addr := "http://127.0.0.1:4444"
 	selenium.HTTPClient = &http.Client{
@@ -67,6 +68,7 @@ func TestChrome(t *testing.T) {
 	t.Logf("pic %v", pic)
 }
 
+// TestFirefox 测试 firefox
 func TestFirefox(t *testing.T) {
 	addr := "http://127.0.0.1:4444"
 	selenium.HTTPClient = &http.Client{
