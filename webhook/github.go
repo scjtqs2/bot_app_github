@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/tebeka/selenium/firefox"
 	"net/http"
 	"os"
 	"strconv"
@@ -94,7 +95,7 @@ func (g *GHook) parseEvents() {
 				// wdvxdr1123 opened issue Mrs4s/go-cqhttp#1358
 				msg = fmt.Sprintf("%s %s issue %s/%s #%d \n", event.FromUser, event.Action, event.Owner, event.Repo, event.Payload.Get("issue.number").Int()) +
 					fmt.Sprintf("jump: %s \n", event.Payload.Get("issue.html_url").String())
-				if g.checkSelenuinEnable() {
+				if g.checkSelemiumEnable() {
 					if pic, err := g.getIssueByChrome(event.Payload.Get("issue.html_url").String(), event.Payload.Get("issue.id").String()); err == nil {
 						isPic = true
 						msg += coolq.EnImageCode(fmt.Sprintf("base64://%s", base64.StdEncoding.EncodeToString(pic)), 0)
@@ -110,7 +111,7 @@ func (g *GHook) parseEvents() {
 			case "closed":
 				msg = fmt.Sprintf("%s %s issue %s/%s #%d \n", event.FromUser, event.Action, event.Owner, event.Repo, event.Payload.Get("issue.number").Int()) +
 					fmt.Sprintf("jump: %s \n", event.Payload.Get("issue.html_url").String())
-				if g.checkSelenuinEnable() {
+				if g.checkSelemiumEnable() {
 					if pic, err := g.getIssueByChrome(event.Payload.Get("issue.html_url").String(), event.Payload.Get("issue.id").String()); err == nil {
 						isPic = true
 						msg += coolq.EnImageCode(fmt.Sprintf("base64://%s", base64.StdEncoding.EncodeToString(pic)), 0)
@@ -126,7 +127,7 @@ func (g *GHook) parseEvents() {
 			case "reopened":
 				msg = fmt.Sprintf("%s %s issue %s/%s #%d \n", event.FromUser, event.Action, event.Owner, event.Repo, event.Payload.Get("issue.number").Int()) +
 					fmt.Sprintf("jump: %s \n", event.Payload.Get("issue.html_url").String())
-				if g.checkSelenuinEnable() {
+				if g.checkSelemiumEnable() {
 					if pic, err := g.getIssueByChrome(event.Payload.Get("issue.html_url").String(), event.Payload.Get("issue.id").String()); err == nil {
 						isPic = true
 						msg += coolq.EnImageCode(fmt.Sprintf("base64://%s", base64.StdEncoding.EncodeToString(pic)), 0)
@@ -149,7 +150,7 @@ func (g *GHook) parseEvents() {
 			case "created":
 				msg = fmt.Sprintf("%s commented on %s/%s #%d \n", event.FromUser, event.Owner, event.Repo, event.Payload.Get("issue.number").Int()) +
 					fmt.Sprintf("jump: %s \n", event.Payload.Get("comment.html_url").String())
-				if g.checkSelenuinEnable() {
+				if g.checkSelemiumEnable() {
 					if pic, err := g.getIssueCommentByChrome(event.Payload.Get("comment.html_url").String(), event.Payload.Get("comment.id").String()); err == nil {
 						isPic = true
 						msg += coolq.EnImageCode(fmt.Sprintf("base64://%s", base64.StdEncoding.EncodeToString(pic)), 0)
@@ -165,7 +166,7 @@ func (g *GHook) parseEvents() {
 			case "edited":
 				msg = fmt.Sprintf("%s edited commente on %s/%s #%d \n", event.FromUser, event.Owner, event.Repo, event.Payload.Get("issue.number").Int()) +
 					fmt.Sprintf("jump: %s \n", event.Payload.Get("comment.html_url").String())
-				if g.checkSelenuinEnable() {
+				if g.checkSelemiumEnable() {
 					if pic, err := g.getIssueCommentByChrome(event.Payload.Get("comment.html_url").String(), event.Payload.Get("comment.id").String()); err == nil {
 						isPic = true
 						msg += coolq.EnImageCode(fmt.Sprintf("base64://%s", base64.StdEncoding.EncodeToString(pic)), 0)
@@ -193,7 +194,7 @@ func (g *GHook) parseEvents() {
 					event.Payload.Get("pull_request.number").Int(),
 					event.BaseBranch, event.Owner, event.Branch) +
 					fmt.Sprintf("jump: %s \n", event.Payload.Get("pull_request.html_url").String())
-				if g.checkSelenuinEnable() {
+				if g.checkChromeEnable() {
 					if pic, err := g.getPullRequestByChrome(event.Payload.Get("pull_request.html_url").String()); err == nil {
 						isPic = true
 						msg += coolq.EnImageCode(fmt.Sprintf("base64://%s", base64.StdEncoding.EncodeToString(pic)), 0)
@@ -232,15 +233,29 @@ func (g *GHook) parseEvents() {
 	}
 }
 
-// checkSelenuinEnable 判断是否启用了selenuimChrome开关
-func (g *GHook) checkSelenuinEnable() bool {
+// checkSelemiumEnable 判断是否开启了 chrome或者firefox
+func (g *GHook) checkSelemiumEnable() bool {
+	check := g.checkChromeEnable()
+	if check {
+		return true
+	}
+	return g.checkFirefoxEnable()
+}
+
+// checkChromeEnable 判断是否启用了selenuimChrome开关
+func (g *GHook) checkChromeEnable() bool {
 	return os.Getenv("SELENIUM_CHROME_ENABLE") == "true"
+}
+
+// checkChromeEnable 判断是否启用了seleniumFirefox开关
+func (g *GHook) checkFirefoxEnable() bool {
+	return os.Getenv("SELENIUM_FIREFOX_ENABLE") == "true"
 }
 
 // getIssueByChrome 通过chrome截图获取 issue详情
 func (g *GHook) getIssueByChrome(url string, issueID string) ([]byte, error) {
 	log.Debugf("url:%s , issueID:%s", url, issueID)
-	wd, err := g.newChrome()
+	wd, err := g.newSelnium()
 	if err != nil {
 		return nil, err
 	}
@@ -282,7 +297,7 @@ func (g *GHook) getIssueByChrome(url string, issueID string) ([]byte, error) {
 
 // getIssueCommentByChrome 通过chrome获取issueComment的截图
 func (g *GHook) getIssueCommentByChrome(url string, issueCommentID string) ([]byte, error) {
-	wd, err := g.newChrome()
+	wd, err := g.newSelnium()
 	if err != nil {
 		return nil, err
 	}
@@ -316,7 +331,7 @@ func (g *GHook) getIssueCommentByChrome(url string, issueCommentID string) ([]by
 
 // getPullRequestByChrome 用于获取pullRequest的界面截图
 func (g *GHook) getPullRequestByChrome(url string) ([]byte, error) {
-	wd, err := g.newChrome()
+	wd, err := g.newSelnium()
 	if err != nil {
 		return nil, err
 	}
@@ -352,26 +367,71 @@ func (g *GHook) getPullRequestByChrome(url string) ([]byte, error) {
 	return pullRequest.Screenshot(false)
 }
 
+// newSelnium 初始化 webdriver,根据配置进行自动初始化
+func (g *GHook) newSelnium() (selenium.WebDriver, error) {
+	if !g.checkSelemiumEnable() {
+		return nil, errors.New("selenium not enabled")
+	}
+
+	var (
+		wd  selenium.WebDriver
+		err error
+	)
+	if g.checkChromeEnable() {
+		wd, err = g.newChrome()
+	}
+	if g.checkFirefoxEnable() {
+		wd, err = g.newFirefox()
+	}
+	return wd, err
+}
+
 // newChrome 初始化chrome的webdriver
 func (g *GHook) newChrome() (selenium.WebDriver, error) {
-	if !g.checkSelenuinEnable() {
+	if !g.checkChromeEnable() {
 		return nil, errors.New("chrome not enabled")
 	}
 	addr := os.Getenv("SELENIUM_CHROME_ADDR")
 	selenium.HTTPClient = &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 30,
 	}
 	caps := selenium.Capabilities{"browserName": "chrome"}
 	// chrome参数
 	chromeCaps := chrome.Capabilities{
 		Args: []string{
 			"--headless", // 设置Chrome无头模式，在linux下运行，需要设置这个参数，否则会报错
+			"--disable-gpu",
 			// "--no-sandbox",
 			"--window-size=600,812",
 			// fmt.Sprintf("--proxy-server=%s", "http://192.168.28.101:7890"), // --proxy-server=http://127.0.0.1:1234
 		},
 	}
 	caps.AddChrome(chromeCaps)
+	wd, err := selenium.NewRemote(caps, addr)
+	return wd, err
+}
+
+// newFirefox 初始化firefox的webdriver
+func (g *GHook) newFirefox() (selenium.WebDriver, error) {
+	if !g.checkFirefoxEnable() {
+		return nil, errors.New("firefox not enabled")
+	}
+	addr := os.Getenv("SELENIUM_FIRFOX_ADDR")
+	selenium.HTTPClient = &http.Client{
+		Timeout: time.Second * 30,
+	}
+	caps := selenium.Capabilities{"browserName": "firefox"}
+	// firefox 参数
+	firefoxCaps := firefox.Capabilities{
+		Args: []string{
+			"--headless", // 设置Chrome无头模式，在linux下运行，需要设置这个参数，否则会报错
+			"--disable-gpu",
+			"window-size=600,812",
+			// "--no-sandbox",
+			// fmt.Sprintf("--proxy-server=%s", "http://192.168.28.101:7890"), // --proxy-server=http://127.0.0.1:1234
+		},
+	}
+	caps.AddFirefox(firefoxCaps)
 	wd, err := selenium.NewRemote(caps, addr)
 	return wd, err
 }
