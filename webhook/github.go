@@ -419,14 +419,14 @@ func (g *GHook) newFirefox() (selenium.WebDriver, error) {
 	}
 	addr := os.Getenv("SELENIUM_FIREFOX_ADDR")
 	selenium.HTTPClient = &http.Client{
-		Timeout: time.Second * 30,
+		Timeout: time.Second * 60,
 	}
 	caps := selenium.Capabilities{"browserName": "firefox"}
 	// firefox 参数
 	firefoxCaps := firefox.Capabilities{
 		Args: []string{
 			"--headless", // 设置Chrome无头模式，在linux下运行，需要设置这个参数，否则会报错
-			"--disable-gpu",
+			// "--disable-gpu",
 			"window-size=600,812",
 			// "--no-sandbox",
 			// fmt.Sprintf("--proxy-server=%s", "http://192.168.28.101:7890"), // --proxy-server=http://127.0.0.1:1234
