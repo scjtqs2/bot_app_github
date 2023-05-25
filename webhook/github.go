@@ -5,11 +5,12 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/tebeka/selenium/firefox"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/tebeka/selenium/firefox"
 
 	"github.com/tebeka/selenium/chrome"
 
