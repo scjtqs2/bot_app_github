@@ -5,12 +5,16 @@ import (
 	"github.com/tebeka/selenium/chrome"
 	"github.com/tebeka/selenium/firefox"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 )
 
 // TestChrome 测试 chrome
 func TestChrome(t *testing.T) {
+	if os.Getenv("local") != "true" {
+		return
+	}
 	addr := "http://127.0.0.1:4444"
 	selenium.HTTPClient = &http.Client{
 		Timeout: time.Second * 30,
@@ -24,6 +28,7 @@ func TestChrome(t *testing.T) {
 			"--window-size=600,812",
 			// fmt.Sprintf("--proxy-server=%s", "http://192.168.28.101:7890"), // --proxy-server=http://127.0.0.1:1234
 		},
+		W3C: true,
 	}
 	caps.AddChrome(chromeCaps)
 	wd, err := selenium.NewRemote(caps, addr)
@@ -70,6 +75,9 @@ func TestChrome(t *testing.T) {
 
 // TestFirefox 测试 firefox
 func TestFirefox(t *testing.T) {
+	if os.Getenv("local") != "true" {
+		return
+	}
 	addr := "http://127.0.0.1:4444"
 	selenium.HTTPClient = &http.Client{
 		Timeout: time.Second * 60,
