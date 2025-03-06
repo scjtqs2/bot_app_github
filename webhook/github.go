@@ -313,12 +313,12 @@ func (g *GHook) getIssueCommentByChrome(url string, issueCommentID string) ([]by
 		_, err = wd.FindElement(selenium.ByCSSSelector, "#js-repo-pjax-container")
 		return err == nil, nil
 	})
+	time.Sleep(time.Second * 5)
 	sizeEle, err := wd.FindElement(selenium.ByCSSSelector, "#js-repo-pjax-container")
 	if err != nil {
 		return nil, err
 	}
 	// comment, err := wd.FindElement(selenium.ByCSSSelector, fmt.Sprintf("#issuecomment-%s > div", issueCommentID))
-	time.Sleep(time.Second * 2)
 	_ = wd.Wait(func(wd selenium.WebDriver) (bool, error) {
 		_, err = wd.FindElement(selenium.ByXPATH, fmt.Sprintf("//*[@id=\"issuecomment-%s\"]/../../..", issueCommentID))
 		return err == nil, nil
