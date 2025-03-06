@@ -1,10 +1,10 @@
 FROM golang:1.17-alpine AS builder
-RUN  sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+RUN  #sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
 RUN apk add --no-cache git \
   && go env -w GO111MODULE=auto \
-  && go env -w CGO_ENABLED=1 \
-  && go env -w GOPROXY=https://goproxy.cn,direct
+  && go env -w CGO_ENABLED=1
+#  && go env -w GOPROXY=https://goproxy.cn,direct
 
 WORKDIR /build
 
@@ -18,7 +18,7 @@ RUN set -ex \
 
 FROM alpine AS production
 
-RUN  sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+RUN  #sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
 RUN apk add --no-cache tzdata \
     && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
