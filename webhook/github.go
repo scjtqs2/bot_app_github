@@ -317,7 +317,8 @@ func (g *GHook) getIssueCommentByChrome(url string, issueCommentID string) ([]by
 	if err != nil {
 		return nil, err
 	}
-	comment, err := wd.FindElement(selenium.ByCSSSelector, fmt.Sprintf("#issuecomment-%s > div", issueCommentID))
+	// comment, err := wd.FindElement(selenium.ByCSSSelector, fmt.Sprintf("#issuecomment-%s > div", issueCommentID))
+	comment, err := wd.FindElement(selenium.ByXPATH, fmt.Sprintf("//*[@id=\"issuecomment-%s\"]/../../..", issueCommentID))
 	if err != nil {
 		return nil, err
 	}
@@ -327,6 +328,7 @@ func (g *GHook) getIssueCommentByChrome(url string, issueCommentID string) ([]by
 	}
 	window, _ := wd.CurrentWindowHandle()
 	_ = wd.ResizeWindow(window, size.Width, size.Height+100)
+	time.Sleep(time.Second * 5)
 	return comment.Screenshot(false)
 }
 
