@@ -318,6 +318,10 @@ func (g *GHook) getIssueCommentByChrome(url string, issueCommentID string) ([]by
 		return nil, err
 	}
 	// comment, err := wd.FindElement(selenium.ByCSSSelector, fmt.Sprintf("#issuecomment-%s > div", issueCommentID))
+	_ = wd.Wait(func(wd selenium.WebDriver) (bool, error) {
+		_, err = wd.FindElement(selenium.ByXPATH, fmt.Sprintf("//*[@id=\"issuecomment-%s\"]/../../..", issueCommentID))
+		return err == nil, nil
+	})
 	comment, err := wd.FindElement(selenium.ByXPATH, fmt.Sprintf("//*[@id=\"issuecomment-%s\"]/../../..", issueCommentID))
 	if err != nil {
 		return nil, err
